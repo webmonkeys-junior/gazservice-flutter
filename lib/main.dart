@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'item_list_screen.dart'; // Import the new screen
 
 void main() {
   runApp(MyApp());
@@ -36,6 +37,10 @@ class _AuthScreenState extends State<AuthScreen> {
     if (_isLoginMode) {
       // Handle login logic
       print('Logging in with email: $email and password: $password');
+      // Navigate to the item list after login
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => ItemListScreen()),
+      );
     } else {
       final username = _usernameController.text;
       // Handle registration logic
@@ -97,7 +102,3 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 }
-
-
-
-
