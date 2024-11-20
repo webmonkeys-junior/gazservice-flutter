@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'object_list_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -44,12 +45,12 @@ class _AuthScreenState extends State<AuthScreen> {
     if (response.statusCode == 200) {
       // Успешный вход
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login successful!')),
+        SnackBar(content: Text('КАЙФ!')),
       );
     } else {
       // Ошибка входа
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed!')),
+        SnackBar(content: Text('НЕ КАЙФ')),
       );
     }
   }
@@ -67,9 +68,16 @@ class _AuthScreenState extends State<AuthScreen> {
     );
 
     if (response.statusCode == 201) {
+      Navigator.pushReplacement(
+                 context,
+               MaterialPageRoute(builder: (context) => ObjectListScreen()),
+         );
+
+
       // Успешная регистрация
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Registration successful!')),
+
       );
     } else {
       // Ошибка регистрации
