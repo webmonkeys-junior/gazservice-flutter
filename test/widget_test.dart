@@ -11,10 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gazservice/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
-
+    testWidgets('MyApp has a title', (WidgetTester tester) async {
+      await tester.pumpWidget(MyApp());
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);
     expect(find.text('1'), findsNothing);
@@ -28,3 +26,11 @@ void main() {
     expect(find.text('1'), findsOneWidget);
   });
 }
+
+ MyApp() {
+}
+
+
+
+
+

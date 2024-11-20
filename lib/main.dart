@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'item_list_screen.dart'; // Import the new screen
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runApp(MyApp());
@@ -24,79 +25,114 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _usernameController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  String _email = '';
+  String _password = '';
 
-  bool _isLoginMode = true; // Toggle between login and registration
+  Future<void> _login() async {
+    final response = await http.post(
+      Uri.parse('https://gaz-api.webmonkeys.ru/login'), // Change to your server URL
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'username': _email,
+        'password': _password,
+      }),
+    );
 
-  void _submit() {
-    final email = _emailController.text;
-    final password = _passwordController.text;
-
-    if (_isLoginMode) {
-      // Handle login logic
-      print('Logging in with email: $email and password: $password');
-      // Navigate to the item list after login
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => ItemListScreen()),
+    if (response.statusCode == 200) {
+      // Успешный вход
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login successful!')),
       );
     } else {
-      final username = _usernameController.text;
-      // Handle registration logic
-      print('Registering with username: $username, email: $email, and password: $password');
+      // Ошибка входа
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed!')),
+      );
     }
+  }
 
-    // Clear the text fields
-    _emailController.clear();
-    _passwordController.clear();
-    if (!_isLoginMode) {
-      _usernameController.clear();
+  Future<void> _register() async {
+    final response = await http.post(
+      Uri.parse(' https://gaz-api.webmonkeys.ru'), // Change to your server URL
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'email': _email,
+        'password': _password,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      // Успешная регистрация
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Registration successful!')),
+      );
+    } else {
+      // Ошибка регистрации
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Registration failed!')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isLoginMode ? 'Login' : 'Register'),
-      ),
+      appBar: AppBar(title: Text('Login and Registration')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (!_isLoginMode)
-              TextField(
-                controller: _usernameController,
-                decoration: InputDecoration(labelText: 'Username'),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Email'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your email';
+                  }
+                  return null;
+                },
+                onChanged: (value) {
+                  _email = value;
+                },
               ),
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _submit,
-              child: Text(_isLoginMode ? 'Login' : 'Register'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _isLoginMode = !_isLoginMode; // Toggle between login and registration
-                });
-              },
-              child: Text(_isLoginMode
-                  ? 'Don\'t have an account? Register here.'
-                  : 'Already have an account? Login here.'),
-            ),
-          ],
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Password'),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your password';
+                  }
+                  return null;
+                },
+                onChanged: (value) {
+                  _password = value;
+                },
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    _login();
+                  }
+                },
+                child: Text('Login'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    _register();
+                  }
+                },
+                child: Text('Register'),
+              ),
+            ],
+          ),
         ),
       ),
     );
