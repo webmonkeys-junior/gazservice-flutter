@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -19,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Регистрация'),
+        title: const Text('Регистрация'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -27,14 +29,14 @@ class _LoginScreenState extends State<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildRoundedTextField(_usernameController, 'Имя пользователя'),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             _buildRoundedTextField(_emailController, 'Электронная почта'),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             _buildRoundedTextField(_passwordController, 'Пароль', obscureText: true),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _register,
-              child: Text('Зарегистрироваться'),
+              child: const Text('Зарегистрироваться'),
             ),
           ],
         ),
@@ -53,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
         decoration: InputDecoration(
           labelText: label,
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
         ),
         obscureText: obscureText,
       ),

@@ -6,10 +6,12 @@ import 'dart:convert';
 
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -17,12 +19,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: AuthScreen(),
+      home: const AuthScreen(),
     );
   }
 }
 
 class AuthScreen extends StatefulWidget {
+  const AuthScreen({super.key});
+
   @override
   _AuthScreenState createState() => _AuthScreenState();
 }
@@ -46,17 +50,17 @@ class _AuthScreenState extends State<AuthScreen> {
 
     if (response.statusCode == 200) {
       Navigator.push(context, MaterialPageRoute(
-        builder: (context) => ItemListScreen(),
+        builder: (context) => const ItemListScreen(),
       ));
       // Успешный вход
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('КАЙФ!')),
+        const SnackBar(content: Text('КАЙФ!')),
       );
     } else {
       // Ошибка входа
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('НЕ КАЙФ')),
+        const SnackBar(content: Text('НЕ КАЙФ')),
       );
     }
   }
@@ -76,19 +80,19 @@ class _AuthScreenState extends State<AuthScreen> {
     if (response.statusCode == 201) {
       Navigator.pushReplacement(
                  context,
-               MaterialPageRoute(builder: (context) => ItemListScreen()),
+               MaterialPageRoute(builder: (context) => const ItemListScreen()),
          );
 
 
       // Успешная регистрация
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration successful!')),
+        const SnackBar(content: Text('Registration successful!')),
 
       );
     } else {
       // Ошибка регистрации
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration failed!')),
+        const SnackBar(content: Text('Registration failed!')),
       );
     }
   }
@@ -96,7 +100,7 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login and Registration')),
+      appBar: AppBar(title: const Text('Login and Registration')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -104,7 +108,7 @@ class _AuthScreenState extends State<AuthScreen> {
           child: Column(
             children: [
               TextFormField(
-                decoration: InputDecoration(labelText: 'Email'),
+                decoration: const InputDecoration(labelText: 'Email'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your email';
@@ -116,7 +120,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 },
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Password'),
+                decoration: const InputDecoration(labelText: 'Password'),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -128,14 +132,14 @@ class _AuthScreenState extends State<AuthScreen> {
                   _password = value;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     _login();
                   }
                 },
-                child: Text('Login'),
+                child: const Text('Login'),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -143,7 +147,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     _register();
                   }
                 },
-                child: Text('Register'),
+                child: const Text('Register'),
               ),
             ],
           ),

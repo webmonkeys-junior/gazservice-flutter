@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
-import 'dart:convert';
 
 class ObjectListScreen extends StatelessWidget {
+  const ObjectListScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Список объектов')),
-      body: Center(child: Text('Здесь будет список объектов')),
+      appBar: AppBar(title: const Text('Список объектов')),
+      body: const Center(child: Text('Здесь будет список объектов')),
     );
   }
 }
