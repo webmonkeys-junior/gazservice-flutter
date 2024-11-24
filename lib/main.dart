@@ -50,7 +50,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
     if (response.statusCode == 200) {
       Navigator.push(context, MaterialPageRoute(
-        builder: (context) => const ItemListScreen(),
+        builder: (context) =>  ItemListScreen(),
       ));
       // Успешный вход
 
@@ -80,7 +80,7 @@ class _AuthScreenState extends State<AuthScreen> {
     if (response.statusCode == 201) {
       Navigator.pushReplacement(
                  context,
-               MaterialPageRoute(builder: (context) => const ItemListScreen()),
+               MaterialPageRoute(builder: (context) =>  ItemListScreen()),
          );
 
 

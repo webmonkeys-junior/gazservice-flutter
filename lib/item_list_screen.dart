@@ -10,7 +10,7 @@ class ItemListScreen extends StatelessWidget {
     // Add more items as needed
   ];
 
-  const ItemListScreen({super.key});
+  ItemListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,8 +38,7 @@ class ItemListScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder:(context) =>
-                        WorkScreen(itemId: item.id),
+                    builder: (context) => WorkScreen(itemId: item.id),
                   ),
                 );
               },
