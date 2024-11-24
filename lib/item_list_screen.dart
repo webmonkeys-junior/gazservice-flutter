@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'item.dart';
 import 'work_screen.dart';
+import 'add_object_screen.dart';
 
 class ItemListScreen extends StatelessWidget {
   final List<Item> items = [
@@ -46,6 +47,15 @@ class ItemListScreen extends StatelessWidget {
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+          onPressed:() {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder:(context) => AddObjectscreen(),
+              ),
+            );
+          }),
     );
   }
 }
