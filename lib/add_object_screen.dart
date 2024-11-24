@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class AddObjectScreen extends StatefulWidget {
   const AddObjectScreen({Key? key}) : super(key: key);
@@ -14,24 +16,35 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
   String? address;
   String? time;
   double? amount;
+  File? _image; // Variable to hold the selected image
+
+  final ImagePicker _picker = ImagePicker();
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
       // Create FormData
-      var formData = {
-        'name': name,
-        'address': address,
-        'time': time,
-        'amount': amount.toString(),
-      };
-
-      // Send POST request
-      final response = await http.post(
+      var request = http.MultipartRequest(
+        'POST',
         Uri.parse('http://gaz-api.webmonkeys.ru/works'), // Replace with your API endpoint
-        body: formData,
       );
+
+      request.fields['name'] = name!;
+      request.fields['address'] = address!;
+      request.fields['time'] = time!;
+      request.fields['amount'] = amount.toString();
+
+      if (_image != null) {
+        // If an image is selected, add it to the request
+        request.files.add(await http.MultipartFile.fromPath(
+          'photo', // This should match your backend's expected field name
+          _image!.path,
+        ));
+      }
+
+      // Send the request
+      final response = await request.send();
 
       if (response.statusCode == 200) {
         // If the server returns a 200 OK response, navigate back
@@ -42,6 +55,19 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
           SnackBar(content: Text('Failed to add object')),
         );
       }
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(
+      source: ImageSource.camera, // Change to ImageSource.gallery if you want to pick from gallery
+      imageQuality: 100, // You can adjust the quality
+    );
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
     }
   }
 
@@ -96,8 +122,21 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
                   }
                   return null;
                 },
-                onSaved: (value) => amount = double.tryParse(value!),
+                onSaved: (value) => amount = value != null ? double.tryParse(value) : null,
               ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _pickImage,
+                child: const Text('Pick Image'),
+              ),
+              const SizedBox(height: 20),
+              if (_image != null)
+                Image.file(
+                  _image!,
+                  height: 150,
+                  width: 150,
+                  fit: BoxFit.cover,
+                ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitForm,
