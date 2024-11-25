@@ -21,7 +21,7 @@ class _WorkScreenState extends State<WorkScreen> {
   }
 
   Future<void> fetchData() async {
-    final response = await http.get(Uri.parse('http://gaz-api.webmonkeys.ru/items/${widget.itemId}'));
+    final response = await http.get(Uri.parse('https://gaz-api.webmonkeys.ru/works/${widget.itemId}'));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);

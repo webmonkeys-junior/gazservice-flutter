@@ -38,6 +38,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _login() async {
     final response = await http.post(
+       // Uri.parse('https://ya.ru'),
       Uri.parse('https://gaz-api.webmonkeys.ru/login'), // Change to your server URL
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
