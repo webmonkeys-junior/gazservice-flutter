@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:geolocator/geolocator.dart';
 
 class AddObjectScreen extends StatefulWidget {
   const AddObjectScreen({Key? key}) : super(key: key);
@@ -10,10 +11,11 @@ class AddObjectScreen extends StatefulWidget {
   _AddObjectScreenState createState() => _AddObjectScreenState();
 }
 
+
 class _AddObjectScreenState extends State<AddObjectScreen> {
   final _formKey = GlobalKey<FormState>();
   String? name;
-  String? address;
+  Position? _currentPosition; // Variable to hold the current position
   String? time;
   double? amount;
   File? _image; // Variable to hold the selected image
@@ -31,7 +33,9 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
       );
 
       request.fields['name'] = name!;
-      request.fields['address'] = address!;
+      request.fields['address'] = _currentPosition != null
+          ? '${_currentPosition!.latitude}, ${_currentPosition!.longitude}' // Use null-aware operator
+          : ''; // Fallback if position is null
       request.fields['time'] = time!;
       request.fields['amount'] = amount.toString();
 
@@ -71,6 +75,22 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
     }
   }
 
+  Future<void> _getCurrentLocation() async {
+    LocationPermission permission;
+    permission = await Geolocator.requestPermission();
+    try {
+      final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      setState(() {
+        _currentPosition = position;
+      });
+    } catch (e) {
+      // Handle permission denied or other exceptions
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not get location: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,16 +113,14 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
                 },
                 onSaved: (value) => name = value,
               ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Address'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter an address';
-                  }
-                  return null;
-                },
-                onSaved: (value) => address = value,
+              ElevatedButton(
+                onPressed: _getCurrentLocation,
+                child: const Text('Get Current Location'),
               ),
+              if (_currentPosition != null)
+                Text(
+                  'Current Location: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}', // Use null-aware operator
+                ),
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Time'),
                 validator: (value) {
