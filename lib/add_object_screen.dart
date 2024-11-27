@@ -11,14 +11,13 @@ class AddObjectScreen extends StatefulWidget {
   _AddObjectScreenState createState() => _AddObjectScreenState();
 }
 
-
 class _AddObjectScreenState extends State<AddObjectScreen> {
   final _formKey = GlobalKey<FormState>();
   String? name;
   Position? _currentPosition; // Variable to hold the current position
   String? time;
   double? amount;
-  File? _image; // Variable to hold the selected image
+  List<File> _images = []; // List to hold the selected images
 
   final ImagePicker _picker = ImagePicker();
 
@@ -39,11 +38,11 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
       request.fields['time'] = time!;
       request.fields['amount'] = amount.toString();
 
-      if (_image != null) {
-        // If an image is selected, add it to the request
+      // Add all selected images to the request
+      for (var image in _images) {
         request.files.add(await http.MultipartFile.fromPath(
-          'photo', // This should match your backend's expected field name
-          _image!.path,
+          'photos[]', // This should match your backend's expected field name
+          image.path,
         ));
       }
 
@@ -70,7 +69,7 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
 
     if (pickedFile != null) {
       setState(() {
-        _image = File(pickedFile.path);
+        _images.add(File(pickedFile.path)); // Add the new image to the list
       });
     }
   }
@@ -148,13 +147,20 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
                 child: const Text('Pick Image'),
               ),
               const SizedBox(height: 20),
-              if (_image != null)
-                Image.file(
-                  _image!,
-                  height: 150,
-                  width: 150,
-                  fit: BoxFit.cover,
-                ),
+              // Display all selected images
+              Wrap(
+                spacing: 8.0,
+                children: _images.map((image) {
+                  return Container(
+                    height: 150,
+                    width: 150,
+                    child: Image.file(
+                      image,
+                      fit: BoxFit.cover,
+                    ),
+                  );
+                }).toList(),
+              ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitForm,
