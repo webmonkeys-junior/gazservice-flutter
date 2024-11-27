@@ -1,28 +1,32 @@
 class ItemData {
-  final String id;
+  final int id; // Changed to int based on API response
   final String name;
-  final String address;
-  final String time;
-  final double amount;
-  final String geolocation;
+  final String geo; // Changed to geo based on API response
+  final String createdAt; // Added createdAt field
+  final String work; // Added work field
+  final double sum; // Changed to double based on API response
+  final String photo; // Added photo field (if needed)
 
   ItemData({
     required this.id,
     required this.name,
-    required this.address,
-    required this.time,
-    required this.amount,
-    required this.geolocation,
+    required this.geo,
+    required this.createdAt,
+    required this.work,
+    required this.sum,
+    required this.photo,
   });
 
+  // Factory constructor to create an Item from JSON
   factory ItemData.fromJson(Map<String, dynamic> json) {
     return ItemData(
-      id: json['id'].toString(),
-      name: json['name'],
-      address: json['address'],
-      time: json['time'],
-      amount: json['amount'].toDouble(),
-      geolocation: json['geolocation'],
+      id: json['id'],
+      name: json['name'] ?? '',
+      geo: json['geo'] ?? '',
+      createdAt: json['created_at'] ?? '', // Ensure you format this if needed
+      work: json['work'] ?? '',
+      sum: json['sum'] ?? '',
+      photo: json['photo'] ?? '', // If you want to use this field later
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart'; // Для использования виджетов Flutter
+import 'package:gazservice/item_list_screen.dart';
 import 'package:http/http.dart' as http; // Для выполнения HTTP-запросов
 import 'dart:convert';
 
@@ -6,18 +7,10 @@ import 'item.dart'; // Для работы с JSON
 
 
 class WorkScreen extends StatefulWidget {
-  final String itemId;
-  final String name;
-  final String geolocation;
-  final double amount;
-  final String time;
+  final int itemId;
 
   const WorkScreen({
     required this.itemId,
-    required this.name,
-    required this.geolocation,
-    required this.amount,
-    required this.time,
     Key? key,
   }) : super(key: key);
 
@@ -27,19 +20,26 @@ class WorkScreen extends StatefulWidget {
 
 class _WorkScreenState extends State<WorkScreen> {
   late Future<ItemData> _data;
-
   @override
   void initState() {
     super.initState();
+    // _data = ItemData(
+    //   id: widget.itemId, // Assuming itemId is of type String
+    //   name: "",          // Initialize with empty strings or appropriate default values
+    //   geo: "",
+    //   createdAt: "",
+    //   work: "",
+    //   sum: 0,
+    //   photo: "",
+    // );
     _data = fetchData();
   }
 
   Future<ItemData> fetchData() async {
-    final response = await http.get(Uri.parse('https://gaz-api.webmonkeys.ru/works/${widget.itemId}'));
-
+    final response = await http.get(Uri.parse('https://gaz-api.webmonkeys.ru/works/${widget.itemId.toString()}'));
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return ItemData.fromJson(data);
+      var jsonResponse = json.decode(response.body);
+      return ItemData.fromJson(jsonResponse);
     } else {
       throw Exception('Failed to load data');
     }
@@ -67,15 +67,15 @@ class _WorkScreenState extends State<WorkScreen> {
                 children: [
                   Text("ID: ${item.id}", style: TextStyle(fontSize: 20)),
                   SizedBox(height: 10),
-                  Text("Name: ${widget.name}", style: TextStyle(fontSize: 20)),
+                  Text("Name: ${item.name}", style: TextStyle(fontSize: 20)),
                   SizedBox(height: 10),
-                  Text("Address: ${item.address}", style: TextStyle(fontSize: 20)),
+                  Text("Address: ${item.geo}", style: TextStyle(fontSize: 20)),
                   SizedBox(height: 10),
-                  Text("Geolocation: ${widget.geolocation}", style: TextStyle(fontSize: 20)),
+                  Text("Geolocation: ${item.geo}", style: TextStyle(fontSize: 20)),
                   SizedBox(height: 10),
-                  Text("Time: ${widget.time}", style: TextStyle(fontSize: 20)),
+                  Text("Time: ${item.createdAt}", style: TextStyle(fontSize: 20)),
                   SizedBox(height: 10),
-                  Text("Amount: \$${widget.amount.toStringAsFixed(2)}", style: TextStyle(fontSize: 20)),
+                  Text("Amount: \$${item.sum.toStringAsFixed(2)}", style: TextStyle(fontSize: 20)),
                 ],
               ),
             );

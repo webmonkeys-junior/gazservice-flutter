@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'item.dart'; // Make sure you have this item class defined
 import 'work_screen.dart'; // Import your WorkScreen here
 import 'add_object_screen.dart'; // Ensure this import is correct
@@ -9,33 +11,28 @@ class ItemListScreen extends StatefulWidget {
 }
 
 class _ItemListScreenState extends State<ItemListScreen> {
-  List<Item> items = [
-    Item(
-      id: "4",
-      time: "10:00 AM",
-      name: "Komar",
-      address: "Shestakovo",
-      amount: 100.0,
-      geolocation: "37.7749° N, 122.4194° W",
-    ),
-    Item(
-      id: "3",
-      time: "11:00 AM",
-      name: "KOmar",
-      address: "Shestakovo",
-      amount: 150.0,
-      geolocation: "34.0522° N, 118.2437° W",
-    ),
-    Item(
-      id: "2",
-      time: "12:00 PM",
-      name: "CUMar",
-      address: "Shestakovo",
-      amount: 200.0,
-      geolocation: "40.7128° N, 74.0060° W",
-    ),
-    // Add more items as needed
-  ];
+  List<Item> items = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchItems(); // Fetch items when the screen is initialized
+  }
+
+  Future<void> fetchItems() async {
+    final response = await http.get(Uri.parse('https://gaz-api.webmonkeys.ru/works'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> jsonResponse = json.decode(response.body);
+      print("Fetched items: $jsonResponse"); // Debugging line
+      setState(() {
+        items = jsonResponse.map((data) => Item.fromJson(data)).toList();
+      });
+    } else {
+      print("Failed to load items: ${response.statusCode}"); // Debugging line
+      throw Exception('Failed to load items');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,28 +47,31 @@ class _ItemListScreenState extends State<ItemListScreen> {
           return Card(
             margin: const EdgeInsets.all(8.0),
             child: ListTile(
-              title: const Text("Work Screen"),
+              title: Text(item.work), // Use work as the title
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Address: ${item.address}"),
-                  Text("Time: ${item.time}"),
-                  Text("Amount: \$${item.amount.toStringAsFixed(2)}"),
+                  Text("Address: ${item.geo}"), // You may need to modify this field
+                  Text("Time: ${item.createdAt}"), // You may need to modify this field
+                  Text("Amount: ${item.sum.toStringAsFixed(2)} "),
                 ],
               ),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => WorkScreen(
-                      itemId: item.id,
-                      name: item.name,
-                      geolocation: item.geolocation,
-                      amount: item.amount,
-                      time: item.time,
+                if (item.id != null && item.name != null && item.geo != null && item.createdAt != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => WorkScreen(
+                        itemId: item.id,
+                      ),
                     ),
-                  ),
-                );
+                  );
+                } else {
+                  // Handle the error case, e.g., show a snackbar or alert
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Some data is missing.')),
+                  );
+                }
               },
             ),
           );
@@ -89,11 +89,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
           // Check if the result is true, which indicates a successful addition
           if (result == true) {
             // Optionally, you could re-fetch or refresh the items here
-            setState(() {
-              // You can add the new item to the list here if you have the data
-              // For example, if you have the new item data, you could do:
-              // items.add(newItem);
-            });
+            fetchItems(); // Refresh the list after adding a new item
           }
         },
         child: const Icon(Icons.add),
@@ -104,19 +100,34 @@ class _ItemListScreenState extends State<ItemListScreen> {
 }
 
 class Item {
-  final String id;
+  final int id; // Changed to int based on API response
   final String name;
-  final String address;
-  final String time;
-  final double amount;
-  final String geolocation;
+  final String geo; // Changed to geo based on API response
+  final String createdAt; // Added createdAt field
+  final String work; // Added work field
+  final double sum; // Changed to double based on API response
+  final String photo; // Added photo field (if needed)
 
   Item({
     required this.id,
     required this.name,
-    required this.address,
-    required this.time,
-    required this.amount,
-    required this.geolocation,
+    required this.geo,
+    required this.createdAt,
+    required this.work,
+    required this.sum,
+    required this.photo,
   });
+
+  // Factory constructor to create an Item from JSON
+  factory Item.fromJson(Map<String, dynamic> json) {
+    return Item(
+      id: json['id'],
+      name: json['name'] ?? '',
+      geo: json['geo'] ?? '',
+      createdAt: json['created_at'] ?? '', // Ensure you format this if needed
+      work: json['work'] ?? '',
+      sum: json['sum'] ?? '',
+      photo: json['photo'] ?? '', // If you want to use this field later
+    );
+  }
 }

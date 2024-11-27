@@ -19,6 +19,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
+      darkTheme: ThemeData.dark(), // Define your dark theme here
+      themeMode: ThemeMode.system, // Automatically switch based on system settings
       home: const AuthScreen(),
     );
   }
@@ -56,19 +58,19 @@ class _AuthScreenState extends State<AuthScreen> {
       // Успешный вход
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('КАЙФ!')),
+        const SnackBar(content: Text('Вход выполнен успешно')),
       );
     } else {
       // Ошибка входа
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('НЕ КАЙФ')),
+        const SnackBar(content: Text('Ошибка входа')),
       );
     }
   }
 
   Future<void> _register() async {
     final response = await http.post(
-      Uri.parse(' https://gaz-api.webmonkeys.ru'), // Change to your server URL
+      Uri.parse('https://gaz-api.webmonkeys.ru'), // Change to your server URL
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -101,7 +103,7 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login and Registration')),
+      appBar: AppBar(title: const Text('ООО "Газсервис"')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -109,10 +111,10 @@ class _AuthScreenState extends State<AuthScreen> {
           child: Column(
             children: [
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Email'),
+                decoration: const InputDecoration(labelText: 'Логин'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
+                    return 'Введите логин';
                   }
                   return null;
                 },
@@ -121,11 +123,11 @@ class _AuthScreenState extends State<AuthScreen> {
                 },
               ),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Password'),
+                decoration: const InputDecoration(labelText: 'Пароль'),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your password';
+                    return 'Введите пароль';
                   }
                   return null;
                 },
@@ -140,15 +142,15 @@ class _AuthScreenState extends State<AuthScreen> {
                     _login();
                   }
                 },
-                child: const Text('Login'),
+                child: const Text('Войти'),
               ),
               ElevatedButton(
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _register();
-                  }
+                  Navigator.push(context, MaterialPageRoute(
+                    builder: (context) =>  ItemListScreen(),
+                  ));
                 },
-                child: const Text('Register'),
+                child: const Text('postadmin'),
               ),
             ],
           ),
