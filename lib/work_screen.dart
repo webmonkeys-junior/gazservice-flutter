@@ -1,11 +1,25 @@
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart'; // Для использования виджетов Flutter
+import 'package:http/http.dart' as http; // Для выполнения HTTP-запросов
 import 'dart:convert';
+
+import 'item.dart'; // Для работы с JSON
+
 
 class WorkScreen extends StatefulWidget {
   final String itemId;
+  final String name;
+  final String geolocation;
+  final double amount;
+  final String time;
 
-  const WorkScreen({required this.itemId, Key? key}) : super(key: key);
+  const WorkScreen({
+    required this.itemId,
+    required this.name,
+    required this.geolocation,
+    required this.amount,
+    required this.time,
+    Key? key,
+  }) : super(key: key);
 
   @override
   _WorkScreenState createState() => _WorkScreenState();
@@ -25,7 +39,7 @@ class _WorkScreenState extends State<WorkScreen> {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return ItemData.fromJson(data); // Преобразование JSON в объект ItemData
+      return ItemData.fromJson(data);
     } else {
       throw Exception('Failed to load data');
     }
@@ -53,13 +67,15 @@ class _WorkScreenState extends State<WorkScreen> {
                 children: [
                   Text("ID: ${item.id}", style: TextStyle(fontSize: 20)),
                   SizedBox(height: 10),
-                  Text("Name: ${item.name}", style: TextStyle(fontSize: 20)),
+                  Text("Name: ${widget.name}", style: TextStyle(fontSize: 20)),
                   SizedBox(height: 10),
                   Text("Address: ${item.address}", style: TextStyle(fontSize: 20)),
                   SizedBox(height: 10),
-                  Text("Time: ${item.time}", style: TextStyle(fontSize: 20)),
+                  Text("Geolocation: ${widget.geolocation}", style: TextStyle(fontSize: 20)),
                   SizedBox(height: 10),
-                  Text("Amount: \$${item.amount.toStringAsFixed(2)}", style: TextStyle(fontSize: 20)),
+                  Text("Time: ${widget.time}", style: TextStyle(fontSize: 20)),
+                  SizedBox(height: 10),
+                  Text("Amount: \$${widget.amount.toStringAsFixed(2)}", style: TextStyle(fontSize: 20)),
                 ],
               ),
             );
@@ -67,27 +83,6 @@ class _WorkScreenState extends State<WorkScreen> {
           return const Center(child: Text("No data available"));
         },
       ),
-    );
-  }
-}
-
-
-class ItemData {
-  final String id;
-  final String name;
-  final String address;
-  final String time;
-  final double amount;
-
-  ItemData({required this.id, required this.name, required this.address, required this.time, required this.amount});
-
-  factory ItemData.fromJson(Map<String, dynamic> json) {
-    return ItemData(
-      id: json['id'],
-      name: json['name'],
-      address: json['address'],
-      time: json['time'],
-      amount: json['amount'].toDouble(),
     );
   }
 }
