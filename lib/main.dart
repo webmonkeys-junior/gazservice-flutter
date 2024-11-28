@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Login and Registration',
+      title: 'ООО "Газсервис" | Вход',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),

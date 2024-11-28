@@ -6,6 +6,7 @@ class ItemData {
   final String work; // Added work field
   final double sum; // Changed to double based on API response
   final String photo; // Added photo field (if needed)
+  final String description;
 
   ItemData({
     required this.id,
@@ -15,6 +16,7 @@ class ItemData {
     required this.work,
     required this.sum,
     required this.photo,
+    required this.description,
   });
 
   // Factory constructor to create an Item from JSON
@@ -27,6 +29,7 @@ class ItemData {
       work: json['work'] ?? '',
       sum: json['sum'] ?? '',
       photo: json['photo'] ?? '', // If you want to use this field later
+      description: json['description'] ?? '',
     );
   }
 }

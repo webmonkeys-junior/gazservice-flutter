@@ -16,7 +16,9 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
   final _formKey = GlobalKey<FormState>();
   String? name;
   Position? _currentPosition; // Variable to hold the current position
-  String? time;
+  //String? time;
+  String? description;
+  String? work;
   double? amount;
   File? _image; // Variable to hold the selected image
 
@@ -29,15 +31,17 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
       // Create FormData
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://gaz-api.webmonkeys.ru/works'), // Replace with your API endpoint
+        Uri.parse('https://gaz-api.webmonkeys.ru/works'), // Replace with your API endpoint
       );
 
       request.fields['name'] = name!;
-      request.fields['address'] = _currentPosition != null
+      request.fields['geo'] = _currentPosition != null
           ? '${_currentPosition!.latitude}, ${_currentPosition!.longitude}' // Use null-aware operator
           : ''; // Fallback if position is null
-      request.fields['time'] = time!;
-      request.fields['amount'] = amount.toString();
+      //request.fields['time'] = time!;
+      request.fields['sum'] = amount.toString();
+      request.fields['description'] = "";
+      request.fields['work'] = work!;
 
       if (_image != null) {
         // If an image is selected, add it to the request
@@ -50,13 +54,18 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
       // Send the request
       final response = await request.send();
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         // If the server returns a 200 OK response, navigate back
         Navigator.pop(context, true); // Return true to indicate success
       } else {
+        final responseBody = await response.stream.bytesToString(); // Get the response body as a string
+        print('******************');
+        print('Status Code: ${response.statusCode}');
+        print('Response Body: $responseBody');
+        print('******************');
         // Handle error
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to add object')),
+          SnackBar(content: Text('Произошла ошибка при создании работы')),
         );
       }
     }
@@ -86,7 +95,7 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
     } catch (e) {
       // Handle permission denied or other exceptions
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not get location: $e')),
+        SnackBar(content: Text('Не удалось получить координаты: $e')),
       );
     }
   }
@@ -95,7 +104,7 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Add Object"),
+        title: const Text("Новая работа"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -104,10 +113,10 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
           child: Column(
             children: [
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Name'),
+                decoration: const InputDecoration(labelText: 'Работа'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a name';
+                    return 'Введите краткое описание работы';
                   }
                   return null;
                 },
@@ -115,14 +124,15 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
               ),
               ElevatedButton(
                 onPressed: _getCurrentLocation,
-                child: const Text('Get Current Location'),
+                child: const Text('Получить геопозицию'),
               ),
               if (_currentPosition != null)
                 Text(
-                  'Current Location: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}', // Use null-aware operator
+                  'Текущие координаты: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}', // Use null-aware operator
                 ),
+              /*
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Time'),
+                decoration: const InputDecoration(labelText: 'Время'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a time';
@@ -130,13 +140,33 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
                   return null;
                 },
                 onSaved: (value) => time = value,
+              ),*/
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Описание'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Введите описание работы';
+                  }
+                  return null;
+                },
+                onSaved: (value) => description = value,
               ),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Amount'),
+                decoration: const InputDecoration(labelText: 'Рабочие'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Введите Фамилию И.О. исполняющих работы';
+                  }
+                  return null;
+                },
+                onSaved: (value) => work = value,
+              ),
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Сумма'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter an amount';
+                    return 'Введите сумму в рублях';
                   }
                   return null;
                 },
@@ -145,7 +175,7 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _pickImage,
-                child: const Text('Pick Image'),
+                child: const Text('Сделать фото'),
               ),
               const SizedBox(height: 20),
               if (_image != null)
@@ -158,7 +188,7 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _submitForm,
-                child: const Text('Submit'),
+                child: const Text('Отправить работу'),
               ),
             ],
           ),
