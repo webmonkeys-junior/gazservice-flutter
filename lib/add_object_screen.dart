@@ -21,6 +21,12 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
 
   final ImagePicker _picker = ImagePicker();
 
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation(); // Automatically get the current location when the screen loads
+  }
+
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
@@ -77,13 +83,21 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
   Future<void> _getCurrentLocation() async {
     LocationPermission permission;
     permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      // Handle permission denied
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Location permission denied')),
+      );
+      return;
+    }
+
     try {
       final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
       setState(() {
         _currentPosition = position;
       });
     } catch (e) {
-      // Handle permission denied or other exceptions
+      // Handle other exceptions
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Could not get location: $e')),
       );
@@ -112,13 +126,9 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
                 },
                 onSaved: (value) => name = value,
               ),
-              ElevatedButton(
-                onPressed: _getCurrentLocation,
-                child: const Text('Get Current Location'),
-              ),
               if (_currentPosition != null)
                 Text(
-                  'Current Location: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}', // Use null-aware operator
+                  'Current Location: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}',
                 ),
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Time'),
