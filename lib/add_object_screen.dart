@@ -20,9 +20,15 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
   String? description;
   String? work;
   double? amount;
-  File? _image; // Variable to hold the selected image
+  List<File> _images = [];
 
   final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
@@ -43,11 +49,10 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
       request.fields['description'] = "";
       request.fields['work'] = work!;
 
-      if (_image != null) {
-        // If an image is selected, add it to the request
+      for (var image in _images) {
         request.files.add(await http.MultipartFile.fromPath(
-          'photo', // This should match your backend's expected field name
-          _image!.path,
+          'photos[]',
+          image.path,
         ));
       }
 
@@ -74,12 +79,12 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(
       source: ImageSource.camera, // Change to ImageSource.gallery if you want to pick from gallery
-      imageQuality: 100, // You can adjust the quality
+      imageQuality: 80, // You can adjust the quality
     );
 
     if (pickedFile != null) {
       setState(() {
-        _image = File(pickedFile.path);
+        _images.add(File(pickedFile.path));
       });
     }
   }
@@ -87,6 +92,13 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
   Future<void> _getCurrentLocation() async {
     LocationPermission permission;
     permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Получение местоположения было отклонено. Зайдите в настройки приложения и разрешите')),
+      );
+      return;
+    }
+
     try {
       final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
       setState(() {
@@ -108,82 +120,84 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Работа'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Введите краткое описание работы';
-                  }
-                  return null;
-                },
-                onSaved: (value) => name = value,
-              ),
-              ElevatedButton(
-                onPressed: _getCurrentLocation,
-                child: const Text('Получить геопозицию'),
-              ),
-              if (_currentPosition != null)
-                Text(
-                  'Текущие координаты: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}', // Use null-aware operator
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Работа'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Введите краткое описание работы';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => name = value,
                 ),
-              /*
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Время'),
-                validator: (value) {
+                if (_currentPosition != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text(
+                      'Текущие координаты: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  ),
+                  TextFormField(
+                  decoration: const InputDecoration(labelText: 'Описание'),
+                  validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a time';
+                  return 'Введите описание работы';
                   }
                   return null;
-                },
-                onSaved: (value) => time = value,
-              ),*/
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Описание'),
-                validator: (value) {
+                  },
+                  onSaved: (value) => description = value,
+                  ),
+                  TextFormField(
+                  decoration: const InputDecoration(labelText: 'Рабочие'),
+                  validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Введите описание работы';
+                  return 'Введите Фамилию И.О. исполняющих работы';
                   }
                   return null;
-                },
-                onSaved: (value) => description = value,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Рабочие'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Введите Фамилию И.О. исполняющих работы';
-                  }
-                  return null;
-                },
-                onSaved: (value) => work = value,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Сумма'),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Введите сумму в рублях';
-                  }
-                  return null;
-                },
-                onSaved: (value) => amount = value != null ? double.tryParse(value) : null,
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _pickImage,
-                child: const Text('Сделать фото'),
-              ),
-              const SizedBox(height: 20),
-              if (_image != null)
-                Image.file(
-                  _image!,
-                  height: 150,
-                  width: 150,
-                  fit: BoxFit.cover,
+                  },
+                  onSaved: (value) => work = value,
+                  ),
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Стоимость'),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Введите стоимость работ';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => amount = value != null ? double.tryParse(value) : null,
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _pickImage,
+                  child: const Text('Сделать фото'),
+                ),
+                const SizedBox(height: 20),
+                Wrap(
+                  spacing: 8.0,
+                  children: _images.map((image) {
+                    return Card(
+                      elevation: 4,
+                      child: Container(
+                        height: 150,
+                        width: 150,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Image.file(
+                            image,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
               const SizedBox(height: 20),
               ElevatedButton(

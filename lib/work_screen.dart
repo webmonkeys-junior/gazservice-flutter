@@ -22,6 +22,7 @@ class WorkScreen extends StatefulWidget {
 
 class _WorkScreenState extends State<WorkScreen> {
   late Future<ItemData> _data;
+
   @override
   void initState() {
     super.initState();
