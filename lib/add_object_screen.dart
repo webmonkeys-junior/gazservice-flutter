@@ -14,52 +14,47 @@ class AddObjectScreen extends StatefulWidget {
 class _AddObjectScreenState extends State<AddObjectScreen> {
   final _formKey = GlobalKey<FormState>();
   String? name;
-  Position? _currentPosition; // Variable to hold the current position
+  Position? _currentPosition;
   String? time;
   double? amount;
-  List<File> _images = []; // List to hold the selected images
+  List<File> _images = [];
 
   final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation(); // Automatically get the current location when the screen loads
+    _getCurrentLocation();
   }
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      // Create FormData
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://gaz-api.webmonkeys.ru/works'), // Replace with your API endpoint
+        Uri.parse('http://gaz-api.webmonkeys.ru/works'),
       );
 
       request.fields['name'] = name!;
       request.fields['address'] = _currentPosition != null
-          ? '${_currentPosition!.latitude}, ${_currentPosition!.longitude}' // Use null-aware operator
-          : ''; // Fallback if position is null
+          ? '${_currentPosition!.latitude}, ${_currentPosition!.longitude}'
+          : '';
       request.fields['time'] = time!;
       request.fields['amount'] = amount.toString();
 
-      // Add all selected images to the request
       for (var image in _images) {
         request.files.add(await http.MultipartFile.fromPath(
-          'photos[]', // This should match your backend's expected field name
+          'photos[]',
           image.path,
         ));
       }
 
-      // Send the request
       final response = await request.send();
 
       if (response.statusCode == 200) {
-        // If the server returns a 200 OK response, navigate back
-        Navigator.pop(context, true); // Return true to indicate success
+        Navigator.pop(context, true);
       } else {
-        // Handle error
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to add object')),
         );
@@ -69,13 +64,13 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
 
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(
-      source: ImageSource.camera, // Change to ImageSource.gallery if you want to pick from gallery
-      imageQuality: 100, // You can adjust the quality
+      source: ImageSource.camera,
+      imageQuality: 100,
     );
 
     if (pickedFile != null) {
       setState(() {
-        _images.add(File(pickedFile.path)); // Add the new image to the list
+        _images.add(File(pickedFile.path));
       });
     }
   }
@@ -84,7 +79,6 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
     LocationPermission permission;
     permission = await Geolocator.requestPermission();
     if (permission == LocationPermission.denied) {
-      // Handle permission denied
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Location permission denied')),
       );
@@ -97,7 +91,6 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
         _currentPosition = position;
       });
     } catch (e) {
-      // Handle other exceptions
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Could not get location: $e')),
       );
@@ -112,71 +105,82 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Name'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a name';
-                  }
-                  return null;
-                },
-                onSaved: (value) => name = value,
-              ),
-              if (_currentPosition != null)
-                Text(
-                  'Current Location: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}',
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Name'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a name';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => name = value,
                 ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Time'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a time';
-                  }
-                  return null;
-                },
-                onSaved: (value) => time = value,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Amount'),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter an amount';
-                  }
-                  return null;
-                },
-                onSaved: (value) => amount = value != null ? double.tryParse(value) : null,
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _pickImage,
-                child: const Text('Pick Image'),
-              ),
-              const SizedBox(height: 20),
-              // Display all selected images
-              Wrap(
-                spacing: 8.0,
-                children: _images.map((image) {
-                  return Container(
-                    height: 150,
-                    width: 150,
-                    child: Image.file(
-                      image,
-                      fit: BoxFit.cover,
+                if (_currentPosition != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text(
+                      'Current Location: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}',
+                      style: TextStyle(color: Colors.grey[600]),
                     ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Submit'),
-              ),
-            ],
+                  ),
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Time'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a time';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => time = value,
+                ),
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Amount'),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter an amount';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => amount = value != null ? double.tryParse(value) : null,
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _pickImage,
+                  child: const Text('Pick Image'),
+                ),
+                const SizedBox(height: 20),
+                Wrap(
+                  spacing: 8.0,
+                  children: _images.map((image) {
+                    return Card(
+                      elevation: 4,
+                      child: Container(
+                        height: 150,
+                        width: 150,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Image.file(
+                            image,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _submitForm,
+                  child: const Text('Submit'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
