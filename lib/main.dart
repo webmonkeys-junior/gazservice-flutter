@@ -3,8 +3,6 @@ import 'package:gazservice/item_list_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-
-
 void main() {
   runApp(const MyApp());
 }
@@ -18,9 +16,13 @@ class MyApp extends StatelessWidget {
       title: 'ООО "Газсервис" | Вход',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.white, fontSize: 16),
+          bodyMedium: TextStyle(color: Colors.white, fontSize: 14),
+        ),
       ),
-      darkTheme: ThemeData.dark(), // Define your dark theme here
-      themeMode: ThemeMode.system, // Automatically switch based on system settings
+      darkTheme: ThemeData.dark(),
+      themeMode: ThemeMode.system,
       home: const AuthScreen(),
     );
   }
@@ -52,15 +54,12 @@ class _AuthScreenState extends State<AuthScreen> {
 
     if (response.statusCode == 200) {
       Navigator.push(context, MaterialPageRoute(
-        builder: (context) =>  ItemListScreen(),
+        builder: (context) => ItemListScreen(),
       ));
-      // Успешный вход
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Вход выполнен успешно')),
       );
     } else {
-      // Ошибка входа
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Ошибка входа')),
       );
@@ -69,7 +68,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _register() async {
     final response = await http.post(
-      Uri.parse('https://gaz-api.webmonkeys.ru'), // Change to your server URL
+      Uri.parse('https://gaz-api.webmonkeys.ru'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -81,18 +80,13 @@ class _AuthScreenState extends State<AuthScreen> {
 
     if (response.statusCode == 201) {
       Navigator.pushReplacement(
-                 context,
-               MaterialPageRoute(builder: (context) =>  ItemListScreen()),
-         );
-
-
-      // Успешная регистрация
+        context,
+        MaterialPageRoute(builder: (context) => ItemListScreen()),
+      );
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Registration successful!')),
-
       );
     } else {
-      // Ошибка регистрации
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Registration failed!')),
       );
@@ -102,13 +96,15 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('GAZSERVICE'), // Заголовок
+        centerTitle: true,
+
+        ),// Центрирование заголовка
+
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blueAccent, Colors.lightBlueAccent],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: Colors.black,
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -122,10 +118,10 @@ class _AuthScreenState extends State<AuthScreen> {
                     decoration: InputDecoration(
                       labelText: 'Email',
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Colors.black,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0),
-                        borderSide: BorderSide.none,
+                        borderSide: const BorderSide(color: Colors.white, width: 1.0), // Белый контур
                       ),
                       contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
                     ),
@@ -144,12 +140,12 @@ class _AuthScreenState extends State<AuthScreen> {
                     decoration: InputDecoration(
                       labelText: 'Password',
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Colors.black,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0),
-                        borderSide: BorderSide.none,
+                        borderSide: const BorderSide(color: Colors.white, width: 1.0), // Белый контур
                       ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
+                      contentPadding: const EdgeInsets .symmetric(vertical: 15.0, horizontal: 10.0),
                     ),
                     obscureText: true,
                     validator: (value) {
@@ -163,36 +159,29 @@ class _AuthScreenState extends State<AuthScreen> {
                     },
                   ),
                   const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _login();
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue, // Background color
-                      padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 30.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
+                  SizedBox(
+                    width: double.infinity, // Задает ширину кнопки на всю ширину
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          _login();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black, // Черный фон
+                        side: const BorderSide(color: Colors.white, width: 1.0), // Белый контур
+                        padding: const EdgeInsets.symmetric(vertical: 15.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.0), // Круглые углы
+                        ),
                       ),
+                      child: const Text('Login', style: TextStyle(fontSize: 18)),
                     ),
-                    child: const Text('Login', style: TextStyle(fontSize: 18)),
                   ),
                   const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _register();
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green, // Background color
-                      padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 30.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
-                    child: const Text('Register', style: TextStyle(fontSize: 18)),
+                  SizedBox(
+                    width: double.infinity, // Задает ширину кнопки на всю ширину
+
                   ),
                 ],
               ),

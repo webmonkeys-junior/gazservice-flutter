@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 class AddObjectScreen extends StatefulWidget {
   const AddObjectScreen({Key? key}) : super(key: key);
@@ -11,16 +12,16 @@ class AddObjectScreen extends StatefulWidget {
   _AddObjectScreenState createState() => _AddObjectScreenState();
 }
 
-
 class _AddObjectScreenState extends State<AddObjectScreen> {
   final _formKey = GlobalKey<FormState>();
+  String? _address;
   String? name;
-  Position? _currentPosition; // Variable to hold the current position
-  //String? time;
+  Position? _currentPosition;
   String? description;
   String? work;
   double? amount;
   List<File> _images = [];
+  bool _isLoading = false;
 
   final ImagePicker _picker = ImagePicker();
 
@@ -34,19 +35,17 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      // Create FormData
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('https://gaz-api.webmonkeys.ru/works'), // Replace with your API endpoint
+        Uri.parse('https://gaz-api.webmonkeys.ru/works'),
       );
 
       request.fields['name'] = name!;
       request.fields['geo'] = _currentPosition != null
-          ? '${_currentPosition!.latitude}, ${_currentPosition!.longitude}' // Use null-aware operator
-          : ''; // Fallback if position is null
-      //request.fields['time'] = time!;
+          ? '${_currentPosition!.latitude}, ${_currentPosition!.longitude}'
+          : '';
       request.fields['sum'] = amount.toString();
-      request.fields['description'] = "";
+      request.fields['description'] = description ?? "";
       request.fields['work'] = work!;
 
       for (var image in _images) {
@@ -56,19 +55,12 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
         ));
       }
 
-      // Send the request
       final response = await request.send();
 
       if (response.statusCode == 201) {
-        // If the server returns a 200 OK response, navigate back
-        Navigator.pop(context, true); // Return true to indicate success
+        Navigator.pop(context, true);
       } else {
-        final responseBody = await response.stream.bytesToString(); // Get the response body as a string
-        print('******************');
-        print('Status Code: ${response.statusCode}');
-        print('Response Body: $responseBody');
-        print('******************');
-        // Handle error
+        final responseBody = await response.stream.bytesToString();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Произошла ошибка при создании работы')),
         );
@@ -78,8 +70,8 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
 
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(
-      source: ImageSource.camera, // Change to ImageSource.gallery if you want to pick from gallery
-      imageQuality: 80, // You can adjust the quality
+      source: ImageSource.camera,
+      imageQuality: 80,
     );
 
     if (pickedFile != null) {
@@ -90,11 +82,10 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
   }
 
   Future<void> _getCurrentLocation() async {
-    LocationPermission permission;
-    permission = await Geolocator.requestPermission();
+    LocationPermission permission = await Geolocator.requestPermission();
     if (permission == LocationPermission.denied) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Получение местоположения было отклонено. Зайдите в настройки приложения и разрешите')),
+        SnackBar(content: Text('Получение местоположения было отклонено.')),
       );
       return;
     }
@@ -104,8 +95,18 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
       setState(() {
         _currentPosition = position;
       });
+      final placemarks = await placemarkFromCoordinates(
+        _currentPosition!.latitude,
+        _currentPosition!.longitude,
+      );
+
+      final placemark = placemarks.first;
+      final address = '${placemark .street}, ${placemark.locality}, ${placemark.postalCode}';
+
+      setState(() {
+        _address = address;
+      });
     } catch (e) {
-      // Handle permission denied or other exceptions
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Не удалось получить координаты: $e')),
       );
@@ -139,30 +140,30 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Text(
-                      'Текущие координаты: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}',
+                      'Текущие координаты: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}\nAddress: $_address',
                       style: TextStyle(color: Colors.grey[600]),
                     ),
                   ),
-                  TextFormField(
+                TextFormField(
                   decoration: const InputDecoration(labelText: 'Описание'),
                   validator: (value) {
-                  if (value == null || value.isEmpty) {
-                  return 'Введите описание работы';
-                  }
-                  return null;
+                    if (value == null || value.isEmpty) {
+                      return 'Введите описание работы';
+                    }
+                    return null;
                   },
                   onSaved: (value) => description = value,
-                  ),
-                  TextFormField(
+                ),
+                TextFormField(
                   decoration: const InputDecoration(labelText: 'Рабочие'),
                   validator: (value) {
-                  if (value == null || value.isEmpty) {
-                  return 'Введите Фамилию И.О. исполняющих работы';
-                  }
-                  return null;
+                    if (value == null || value.isEmpty) {
+                      return 'Введите Фамилию И.О. исполняющих работы';
+                    }
+                    return null;
                   },
                   onSaved: (value) => work = value,
-                  ),
+                ),
                 TextFormField(
                   decoration: const InputDecoration(labelText: 'Стоимость'),
                   keyboardType: TextInputType.number,
@@ -199,12 +200,13 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
                     );
                   }).toList(),
                 ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Отправить работу'),
-              ),
-            ],
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _isLoading ? null : _submitForm,
+                  child: const Text('Отправить работу'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

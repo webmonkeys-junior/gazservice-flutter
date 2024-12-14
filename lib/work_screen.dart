@@ -2,6 +2,7 @@ import 'package:flutter/material.dart'; // Для использования в�
 import 'package:gazservice/item_list_screen.dart';
 import 'package:http/http.dart' as http; // Для выполнения HTTP-запросов
 import 'dart:convert';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:intl/intl.dart';
@@ -26,15 +27,6 @@ class _WorkScreenState extends State<WorkScreen> {
   @override
   void initState() {
     super.initState();
-    // _data = ItemData(
-    //   id: widget.itemId, // Assuming itemId is of type String
-    //   name: "",          // Initialize with empty strings or appropriate default values
-    //   geo: "",
-    //   createdAt: "",
-    //   work: "",
-    //   sum: 0,
-    //   photo: "",
-    // );
     _data = fetchData();
   }
 
