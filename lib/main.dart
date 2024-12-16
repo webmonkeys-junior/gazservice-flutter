@@ -70,13 +70,13 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+        appBar: AppBar(
         title: const Text('GAZSERVICE'), // Заголовок
-        centerTitle: true,
-      ),
-      body: Container(
-      decoration: BoxDecoration(
-      color: Colors.lightBlue,
+    centerTitle: true,
+    ),
+    body: Container(
+    decoration: BoxDecoration(
+    color: Colors.lightBlue,
     ),
     child: Padding(
     padding: const EdgeInsets.all(16.0),
@@ -99,7 +99,7 @@ class _AuthScreenState extends State<AuthScreen> {
     decoration: InputDecoration(
     labelText: 'Email',
     filled: true,
-    fillColor: Colors.black,
+    fillColor: Colors.black.withOpacity(0.5), // Полупрозрачный черный
     border: OutlineInputBorder(
     borderRadius: BorderRadius.circular(10.0),
     borderSide: const BorderSide(color: Colors.white, width: 1.0), // Белый контур
@@ -121,7 +121,7 @@ class _AuthScreenState extends State<AuthScreen> {
     decoration: InputDecoration(
     labelText: 'Password',
     filled: true,
-    fillColor: Colors.black,
+    fillColor: Colors.black.withOpacity(0.5), // Полупрозрачный черный
     border: OutlineInputBorder(
     borderRadius: BorderRadius.circular(10.0),
     borderSide: const BorderSide(color: Colors.white, width: 1.0), // Белый контур
@@ -135,9 +135,9 @@ class _AuthScreenState extends State<AuthScreen> {
     }
     return null;
     },
-    onChanged: (value) {
-    _password = value;
-    },
+      onChanged: (value) {
+        _password = value;
+      },
     ),
       const SizedBox(height: 80), // Увеличенный отступ
       SizedBox(
@@ -149,7 +149,7 @@ class _AuthScreenState extends State<AuthScreen> {
             }
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.black, // Черный фон
+            backgroundColor: Colors.black.withOpacity(0.7), // Полупрозрачный черный фон
             side: const BorderSide(color: Colors.white, width: 1.0), // Белый контур
             padding: const EdgeInsets.symmetric(vertical: 15.0),
             shape: RoundedRectangleBorder(
@@ -167,7 +167,7 @@ class _AuthScreenState extends State<AuthScreen> {
     ),
     ),
     ),
-      ),
+    ),
     );
   }
 }
