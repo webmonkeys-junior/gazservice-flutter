@@ -99,12 +99,10 @@ class _AuthScreenState extends State<AuthScreen> {
       appBar: AppBar(
         title: const Text('GAZSERVICE'), // Заголовок
         centerTitle: true,
-
-        ),// Центрирование заголовка
-
+      ),
       body: Container(
         decoration: BoxDecoration(
-          color: Colors.black,
+          color: Colors.lightBlue,
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -143,9 +141,9 @@ class _AuthScreenState extends State<AuthScreen> {
                       fillColor: Colors.black,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0),
-                        borderSide: const BorderSide(color: Colors.white, width: 1.0), // Белый контур
+                        borderSide: const BorderSide(color: Colors.white , width: 1.0), // Белый контур
                       ),
-                      contentPadding: const EdgeInsets .symmetric(vertical: 15.0, horizontal: 10.0),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
                     ),
                     obscureText: true,
                     validator: (value) {
@@ -158,7 +156,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       _password = value;
                     },
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 80), // Увеличенный отступ
                   SizedBox(
                     width: double.infinity, // Задает ширину кнопки на всю ширину
                     child: ElevatedButton(
@@ -179,10 +177,6 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity, // Задает ширину кнопки на всю ширину
-
-                  ),
                 ],
               ),
             ),
