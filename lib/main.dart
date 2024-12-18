@@ -76,7 +76,7 @@ class _AuthScreenState extends State<AuthScreen> {
     ),
     body: Container(
     decoration: BoxDecoration(
-    color: Colors.lightBlue,
+    color: Colors.blue[900],
     ),
     child: Padding(
     padding: const EdgeInsets.all(16.0),

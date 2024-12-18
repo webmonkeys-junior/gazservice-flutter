@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:http/http.dart' as http;
 
 class AddObjectScreen extends StatefulWidget {
   const AddObjectScreen({Key? key}) : super(key: key);
@@ -101,7 +101,7 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
       );
 
       final placemark = placemarks.first;
-      final address = '${placemark .street}, ${placemark.locality}, ${placemark.postalCode}';
+      final address = '${placemark.street}, ${placemark.locality}, ${placemark.postalCode}';
 
       setState(() {
         _address = address;
@@ -116,100 +116,169 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Новая работа"),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                TextFormField(
-                  decoration: const InputDecoration(labelText: 'Работа'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Введите краткое описание работы';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) => name = value,
-                ),
-                if (_currentPosition != null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      'Текущие координаты: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}\nAddress: $_address',
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  ),
-                TextFormField(
-                  decoration: const InputDecoration(labelText: 'Описание'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Введите описание работы';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) => description = value,
-                ),
-                TextFormField(
-                  decoration: const InputDecoration(labelText: 'Рабочие'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Введите Фамилию И.О. исполняющих работы';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) => work = value,
-                ),
-                TextFormField(
-                  decoration: const InputDecoration(labelText: 'Стоимость'),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Введите стоимость работ';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) => amount = value != null ? double.tryParse(value) : null,
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _pickImage,
-                  child: const Text('Сделать фото'),
-                ),
-                const SizedBox(height: 20),
-                Wrap(
-                  spacing: 8.0,
-                  children: _images.map((image) {
-                    return Card(
-                      elevation: 4,
-                      child: Container(
-                        height: 150,
-                        width: 150,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Image.file(
-                            image,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _submitForm,
-                  child: const Text('Отправить работу'),
-                ),
-              ],
-            ),
+        appBar: AppBar(
+        title: const Text("Добавление объекта"),
+    ),
+    body: Container(
+    width: double.infinity,
+    height: double.infinity,
+    color: Colors.black,
+    child: Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: SingleChildScrollView(
+    child: Form(
+    key: _formKey,
+    child: Column(
+    children: [
+    TextFormField(
+    decoration: InputDecoration(
+    labelText: 'Работа',
+    labelStyle: TextStyle(color: Colors.black), // Цвет названия поля
+    filled: true,
+    fillColor: Colors.white,
+    border: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(0.0), // Закругленные углы
+    borderSide: BorderSide(color: Colors.white), // Белый контур
+    ),
+    ),
+    validator: (value) {
+      if (value == null || value.isEmpty) {
+        return 'Введите краткое описание работы';
+      }
+      return null;
+    },
+      onSaved: (value) => name = value,
+    ),
+      const SizedBox(height: 20),
+      TextFormField(
+        decoration: InputDecoration(
+          labelText: 'Описание',
+          labelStyle: TextStyle(color: Colors.black), // Цвет названия поля
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(0.0), // Закругленные углы
+            borderSide: BorderSide(color: Colors.white), // Белый контур
           ),
         ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Введите описание работы';
+          }
+          return null;
+        },
+        onSaved: (value) => description = value,
       ),
+      const SizedBox(height: 20),
+      TextFormField(
+        decoration: InputDecoration(
+          labelText: 'Рабочие',
+          labelStyle: TextStyle(color: Colors.black), // Цвет названия поля
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(0.0), // Закругленные углы
+            borderSide: BorderSide(color: Colors.white), // Белый контур
+          ),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Введите Фамилию И.О. исполняющих работы';
+          }
+          return null;
+        },
+        onSaved: (value) => work = value,
+      ),
+      const SizedBox(height: 20),
+      TextFormField(
+        decoration: InputDecoration(
+          labelText: 'Стоимость',
+          labelStyle: TextStyle(color: Colors.black), // Цвет названия поля
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(0.0), // Закругленные углы
+            borderSide: BorderSide(color: Colors.white), // Белый контур
+          ),
+        ),
+        keyboardType: TextInputType.number,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Введите стоимость работ';
+          }
+          return null;
+        },
+        onSaved: (value) => amount = value != null ? double.tryParse(value) : null,
+      ),
+      const SizedBox(height: 20),
+      ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+        ),
+        onPressed: _pickImage,
+        child: const Text('Сделать фото'),
+      ),
+      const SizedBox(height: 40),
+      Wrap(
+        spacing: 8.0,
+        children: _images.map((image) {
+          return Card(
+            elevation: 4,
+            child: Container(
+              height: 150,
+              width: 150,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: Image.file(
+                  image,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+      const SizedBox(height: 20),
+      // Рамка для адреса
+      if (_address != null)
+        Container(
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.white),
+            borderRadius: BorderRadius.circular(8.0),
+            color: Colors.white,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Адрес:',
+                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+              ),
+              const SizedBox(height: 8.0),
+              Text(
+                _address!,
+                style: TextStyle(color: Colors.black),
+              ),
+            ],
+          ),
+        ),
+      const SizedBox(height: 20),
+      ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+        ),
+        onPressed: _isLoading ? null : _submitForm,
+        child: const Text('Отправить работу'),
+      ),
+    ],
+    ),
+    ),
+    ),
+    ),
+    ),
     );
   }
 }
