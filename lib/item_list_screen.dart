@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gazservice/edit_object_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'item.dart'; // Make sure you have this item class defined
@@ -93,6 +94,17 @@ class _ItemListScreenState extends State<ItemListScreen> {
                 ],
               ),
               onTap: () {
+          Navigator.push(
+          context,
+          MaterialPageRoute(
+          builder: (context) => EditObjectScreen(item: item),
+          ),
+          ).then ((result) {
+          if (result == true) {
+          fetchItems();
+          }
+          });
+
                 if (item.id != null && item.name != null && item.geo != null && item.createdAt != null) {
                   Navigator.push(
                     context,
