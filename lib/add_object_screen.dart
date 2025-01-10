@@ -4,13 +4,14 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 class AddObjectScreen extends StatefulWidget {
   const AddObjectScreen({Key? key}) : super(key: key);
 
   @override
   _AddObjectScreenState createState() => _AddObjectScreenState();
 }
+
 
 class _AddObjectScreenState extends State<AddObjectScreen> {
   final _formKey = GlobalKey<FormState>();
@@ -34,11 +35,16 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? jwtToken = prefs.getString('jwt_token');
+      // Create FormData
       var request = http.MultipartRequest(
         'POST',
         Uri.parse('https://gaz-api.webmonkeys.ru/works'),
       );
+      if (jwtToken != null){
+        request.headers['Authorization'] = 'Bearer $jwtToken';
+      }
 
       request.fields['name'] = name!;
       request.fields['geo'] = _currentPosition != null
@@ -55,6 +61,7 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
         ));
       }
 
+      // Send the request
       final response = await request.send();
 
       if (response.statusCode == 201) {
@@ -107,6 +114,7 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
         _address = address;
       });
     } catch (e) {
+      // Handle permission denied or other exceptions
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Не удалось получить координаты: $e')),
       );
@@ -140,7 +148,7 @@ class _AddObjectScreenState extends State<AddObjectScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Text(
-                      'Текущие координаты: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}\nAddress: $_address',
+                      'Текущие координаты: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}\nАдрес: $_address',
                       style: TextStyle(color: Colors.grey[600]),
                     ),
                   ),

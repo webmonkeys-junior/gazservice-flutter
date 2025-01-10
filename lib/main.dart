@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart'; // Импортируем пак�
 import 'package:gazservice/item_list_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -42,18 +43,25 @@ class _AuthScreenState extends State<AuthScreen> {
   String _password = '';
 
   Future<void> _login() async {
+    String credentials = '$_email:$_password';
+
+    // Encode the credentials in Base64
+    String base64Credentials = base64Encode(utf8.encode(credentials));
     final response = await http.post(
       Uri.parse('https://gaz-api.webmonkeys.ru/login'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Basic $base64Credentials',
       },
-      body: jsonEncode(<String, String>{
-        'username': _email,
-        'password': _password,
-      }),
     );
 
     if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      String jwtToken = responseData['access_token'];  // Adjust based on your response structure
+
+      // Store the JWT token in shared preferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('jwt_token', jwtToken);
       Navigator.push(context, MaterialPageRoute(
         builder: (context) => ItemListScreen(),
       ));

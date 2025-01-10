@@ -65,6 +65,8 @@ class _WorkScreenState extends State<WorkScreen> {
             return Center(child: Text('Опаньки! ${snapshot.error}'));
           } else if (snapshot.hasData) {
             final item = snapshot.data!;
+            final List<String> photoNames = item.photo.isNotEmpty ? item.photo.split(';') : [];
+
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -78,40 +80,48 @@ class _WorkScreenState extends State<WorkScreen> {
                   SizedBox(height: 10),
                   Text("Описание: ${item.description}", style: TextStyle(fontSize: 20)),
                   SizedBox(height: 30),
-                  //Text("Geolocation: ${item.geo}", style: TextStyle(fontSize: 20)),
-                  //SizedBox(height: 10),
                   Text("Создано: ${convertDateTime(item.createdAt)}", style: TextStyle(fontSize: 20)),
                   SizedBox(height: 10),
                   Text("Сумма: ${item.sum.toStringAsFixed(2)} \u{20BD}", style: TextStyle(fontSize: 20)),
-                  if (item.photo.isNotEmpty) // Проверяем, есть ли фото
-                    GestureDetector(
-                      onTap: () {
-                        _showLightbox(context, item.photo);
-                      },
-                      child: Image.network(
-                        'https://gaz-api.webmonkeys.ru/uploads/${item.photo}',
-                        width: 100, // Миниатюра
-                        height: 100,
-                        fit: BoxFit.cover,
-                        loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                          if (loadingProgress == null) {
-                            return child; // Return the image when loaded
-                          } else {
-                            // Show a loading indicator while the image is loading
-                            return Center(
-                              child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes != null
-                                    ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
-                                    : null,
-                              ),
-                            );
-                          }
-                        },
-                        errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
-                          // Handle the error case (e.g., show a placeholder or an error message)
-                          return Center(child: Icon(Icons.error)); // Display an error icon
-                        },
+                  SizedBox(height: 20),
+                  if (photoNames.isNotEmpty) // Check if there are photos
+                    GridView.builder(
+                      shrinkWrap: true, // Use shrinkWrap to avoid infinite height issues
+                      physics: NeverScrollableScrollPhysics(), // Disable scrolling
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3, // Number of columns in the grid
+                        childAspectRatio: 1, // Aspect ratio of each grid item
                       ),
+                      itemCount: photoNames.length,
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                          onTap: () {
+                            _showLightbox(context, photoNames[index]); // Show lightbox for all photos
+                          },
+                          child: Image.network(
+                            'https://gaz-api.webmonkeys.ru/uploads/${photoNames[index]}',
+                            fit: BoxFit.cover,
+                            loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                              if (loadingProgress == null) {
+                                return child; // Return the image when loaded
+                              } else {
+                                // Show a loading indicator while the image is loading
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes != null
+                                        ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                                        : null,
+                                  ),
+                                );
+                              }
+                            },
+                            errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+                              // Handle the error case (e.g., show a placeholder or an error message)
+                              return Center(child: Icon(Icons.error)); // Display an error icon
+                            },
+                          ),
+                        );
+                      },
                     ),
                 ],
               ),

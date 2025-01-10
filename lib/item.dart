@@ -28,7 +28,7 @@ class ItemData {
       createdAt: json['created_at'] ?? '', // Ensure you format this if needed
       work: json['work'] ?? '',
       sum: json['sum'] ?? '',
-      photo: json['photo'] ?? '', // If you want to use this field later
+      photo: json['photos'] ?? '', // If you want to use this field later
       description: json['description'] ?? '',
     );
   }

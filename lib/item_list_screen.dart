@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'item.dart'; // Make sure you have this item class defined
+//import 'item.dart'; // Make sure you have this item class defined
 import 'work_screen.dart'; // Import your WorkScreen here
 import 'add_object_screen.dart'; // Ensure this import is correct
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 class ItemListScreen extends StatefulWidget {
   @override
   _ItemListScreenState createState() => _ItemListScreenState();
@@ -20,7 +22,13 @@ class _ItemListScreenState extends State<ItemListScreen> {
   }
 
   Future<void> fetchItems() async {
-    final response = await http.get(Uri.parse('https://gaz-api.webmonkeys.ru/works'));
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? jwtToken = prefs.getString('jwt_token');
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $jwtToken',  // Add the Bearer token
+      'Content-Type': 'application/json; charset=UTF-8',
+    };
+    final response = await http.get(Uri.parse('https://gaz-api.webmonkeys.ru/works'), headers: headers);
 
     if (response.statusCode == 200) {
       List<dynamic> jsonResponse = json.decode(response.body);
